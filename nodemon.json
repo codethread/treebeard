@@ -1,0 +1,10 @@
+{
+  "watch": [
+    "src/"
+  ],
+  "env": {
+    "NODE_ENV": "dev",
+    "NODE_PATH": "src/"
+  },
+  "ext": "js json"
+}
