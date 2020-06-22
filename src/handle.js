@@ -4,32 +4,76 @@ const { ErrCircularDependency, ErrNoStart, ErrInvalidJobObject } = require('util
 module.exports = function schedule(jobs) {
   const jobList = Object.entries(jobs);
   validateHasStart(jobList);
-  validateNoCircles(jobList);
+  validateNoCircles(jobs);
 
   const eventEmitter = new EventEmitter();
   return Promise.all(jobList.map(job => execute(job, eventEmitter)));
 }
 
 function validateNoCircles(jobs) {
+  const jobList = Object.entries(jobs)
+  const c = jobList.map(j => find(j, jobs))
+  const b = traverseFind(c)
+  console.log(JSON.stringify(b))
+}
+
+function find([key, jobObject], all, seen = []) {
+  if (typeof jobObject === 'function') return null
+  if (seen.includes(key)) {
+    seen.push(key)
+    return seen;
+  }
+  seen.push(key)
+  return jobObject.after.map(dep => find([dep, all[dep]], all, seen))
+}
+
+function traverseFind(nestedArray = []) {
+  return nestedArray.find(v => {
+    return Array.isArray(v)
+    ? traverseFind(v)
+    : v !== null;
+  });
+}
+
+function validateNoCircles2(jobs) {
   const { roots, qs } = jobs.reduce(({ roots, qs }, [jobName, jobObject]) => {
     if (typeof jobObject === 'function') {
       roots.set(jobName, null)
     } else {
-      qs.push([jobName, jobObject])
+      jobObject.after.forEach(dep => qs.set(dep, jobName))
     }
 
     return { roots, qs }
-  }, { roots: new Map(), qs: [] });
+  }, { roots: new Map(), qs: new Map() });
 
   console.log(roots)
-  qs.forEach(([jobName, { after }]) => {
-    after.forEach(dep => {
-      if (roots.has(dep)) {
-        roots.set(dep, jobName);
-      }
-    })
-  })
   console.log(qs)
+  console.log('---------------')
+  let change = true
+  while (change && qs.size > 0) {
+    change = false
+    traverse(roots, change)
+  }
+  console.log(roots)
+  console.log(qs)
+
+  function traverse(map, change) {
+    for (let [key, value] of map.entries()) {
+        console.log('t')
+      if (!value) {
+        // leaf value so check
+        const q = qs.get(key);
+        console.log('q', q)
+        if (q) {
+          change = true;
+          map.set(key, q);
+          qs.delete(key);
+        }
+      } else {
+        traverse(map.get(key), change)
+      }
+    }
+  }
 }
 
 function validateNoCirclesX(jobs) {

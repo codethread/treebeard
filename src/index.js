@@ -1,17 +1,30 @@
 const schedule = require('./handle');
 
 schedule({
-  x: print,
-  a: {
-    after: ['c','x'],
-    job: print,
-  },
+  a: print,
   b: {
-    after: ['a'],
+    after: ['f'],
     job: print,
   },
-  c: {
-    after: ['b'],
+  c: print,
+  d: {
+    after: ['a', 'c'],
+    job: print,
+  },
+  e: {
+    after: ['a', 'c'],
+    job: print,
+  },
+  f: {
+    after: ['a', 'b'],
+    job: print,
+  },
+  g: {
+    after: ['f', 'b'],
+    job: print,
+  },
+  h: {
+    after: ['e'],
     job: print,
   },
 }).then(console.log)
