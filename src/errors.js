@@ -15,16 +15,9 @@ class ErrInvalidJobObject extends Error {
     super(message);
   }
 }
+
 module.exports = {
-  upperCaseFirstLetter,
-  uid: require('./uid'),
   ErrInvalidJobObject,
   ErrNoStart,
   ErrCircularDependency,
-
-}
-
-function upperCaseFirstLetter(str = '') {
-  const [first, ...rest] = str.split('');
-  return [first.toUpperCase(), ...rest].join('');
 }

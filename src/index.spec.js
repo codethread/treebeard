@@ -1,6 +1,5 @@
-const { ErrCircularDependency, ErrNoStart, ErrInvalidJobObject } = require('utils');
-const parse = require('./parse');
-const schedule = require('./handle');
+const { ErrCircularDependency, ErrNoStart, ErrInvalidJobObject } = require('./errors');
+const schedule = require('./index');
 
 describe('schedule', () => {
   let jobs, result, error;
@@ -15,7 +14,11 @@ describe('schedule', () => {
         })
         .catch(err => {
           error = err
-          resolve()
+          if (![ErrCircularDependency, ErrNoStart, ErrInvalidJobObject].some(errorInstance => err instanceof errorInstance) ) {
+            reject(err)
+          } else {
+            resolve()
+          }
         });
     });
   });
@@ -23,6 +26,27 @@ describe('schedule', () => {
   afterEach(() => {
     watcher.mockClear();
   })
+
+  describe('when schedule argument is invalid structure of', () => {
+    [
+      ['null',null],
+      ['undefined',undefined],
+      ['string',    'string'],
+      ['number',    3],
+      ['boolean',   true],
+      ['array',     [{ a: watcher }]],
+    ].forEach(([struct, jobObject]) => {
+      describe(struct, () => {
+        beforeAll(() => {
+          jobs = jobObject
+        });
+
+        it('errors to tell user they done messed up', () => {
+          expect(error).toBeInstanceOf(ErrInvalidJobObject);
+        });
+      })
+    })
+  });
 
   describe('when given a list of tasks with no immidiately runnable task', () => {
     beforeAll(() => {

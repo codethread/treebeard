@@ -1,27 +1,24 @@
-const schedule = require('./handle');
+const EventEmitter = require('events');
 
-schedule({
-  x: print,
-  a: {
-    after: ['x'],
-    job: print,
-  },
-  b: {
-    after: ['a'],
-    job: print,
-  },
-  c: {
-    after: ['a'],
-    job: print,
-  },
-}).then(console.log)
+const execute = require('./execute');
+const { ErrInvalidJobObject } = require('./errors');
+const { validateHasStart, validateNoCircles, validateJobObject } = require('./validations')
 
-function print(info) {
-  console.log(info, 'starting');
-  return new Promise(resolve => {
-    setTimeout(() => {
-      console.log(info, 'finished');
-      resolve();
-    }, 1000)
-  })
+module.exports = function schedule(jobs) {
+  if (!jobs || typeof jobs !== 'object') {
+    return Promise.reject(new ErrInvalidJobObject('expected an object of jobObjects'));
+  }
+
+  const jobList = Object.entries(jobs);
+
+  try {
+    jobList.forEach(validateJobObject)
+    validateHasStart(jobList);
+    validateNoCircles(jobs);
+  } catch (e) {
+    return Promise.reject(e);
+  }
+
+  const eventEmitter = new EventEmitter();
+  return Promise.all(jobList.map(job => execute(job, eventEmitter)));
 }
