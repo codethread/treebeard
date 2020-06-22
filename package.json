@@ -4,12 +4,12 @@
   "description": "treebeard",
   "scripts": {
     "test": "NODE_ENV=TEST jest",
-    "lint": "eslint --ext .js --config ./.eslintrc.js ./src ./test",
+    "lint": "eslint --ext .js --config ./.eslintrc.js ./src",
     "lint:fix": "npm run lint -- --fix",
     "nuke": "git clean -dfX"
   },
   "dependencies": {
-    "eslint": "^7.3.0",
+    "eslint": "7.2",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-import-resolver-alias": "^1.1.2",
