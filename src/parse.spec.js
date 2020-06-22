@@ -6,12 +6,18 @@ describe('schedule', () => {
   let jobs, result, error;
   const watcher = jest.fn();
 
-  beforeEach(async () => {
-    try {
-      result = await schedule(jobs)
-    } catch (err) {
-      error = err;
-    }
+  beforeEach(() => {
+    return new Promise((resolve, reject) => {
+      schedule(jobs)
+        .then(res => {
+          result = res
+          resolve();
+        })
+        .catch(err => {
+          error = err
+          resolve()
+        });
+    });
   });
 
   afterEach(() => {

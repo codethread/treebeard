@@ -1,30 +1,17 @@
 const schedule = require('./handle');
 
 schedule({
-  a: print,
+  x: print,
+  a: {
+    after: ['x'],
+    job: print,
+  },
   b: {
-    after: ['f'],
+    after: ['a'],
     job: print,
   },
-  c: print,
-  d: {
-    after: ['a', 'c'],
-    job: print,
-  },
-  e: {
-    after: ['a', 'c'],
-    job: print,
-  },
-  f: {
-    after: ['a', 'b'],
-    job: print,
-  },
-  g: {
-    after: ['f', 'b'],
-    job: print,
-  },
-  h: {
-    after: ['e'],
+  c: {
+    after: ['a'],
     job: print,
   },
 }).then(console.log)
@@ -35,6 +22,6 @@ function print(info) {
     setTimeout(() => {
       console.log(info, 'finished');
       resolve();
-    }, 5000)
+    }, 1000)
   })
 }
